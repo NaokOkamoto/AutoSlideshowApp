@@ -77,6 +77,7 @@ class MainActivity : AppCompatActivity() {
                     image.setImageURI(imageUri)
                 }catch(e: Exception){
                     cursor.moveToFirst()
+                    Log.d("Slideshow", id.toString() )
                     image.setImageURI(imageUri)
                 }
             }
@@ -87,32 +88,53 @@ class MainActivity : AppCompatActivity() {
                     val fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID)
                     val id = cursor.getLong(fieldIndex)
                     val imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                    Log.d("Slideshow", id.toString() )
                     image.setImageURI(imageUri)
+                    Log.d("Slideshow", id.toString() )
                 }catch(e: Exception){
                     cursor.moveToLast()
+                    val fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID)
+                    val id = cursor.getLong(fieldIndex)
+                    val imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                    Log.d("Slideshow", id.toString() )
                     image.setImageURI(imageUri)
+                    Log.d("Slideshow", id.toString() )
                 }
             }
 
             start_and_stop_button.setOnClickListener {
-                mTimer = Timer()
-                mTimer!!.schedule(object : TimerTask() {
-                    override fun run() {
-                        try{cursor.moveToNext()
-                            val fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID)
-                            val id = cursor.getLong(fieldIndex)
-                            val imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
-                            mHandler.post{
-                                image.setImageURI(imageUri)
-                            }
-                        }catch (e: Exception){
-                            cursor.moveToFirst()
-                            mHandler.post{
-                                image.setImageURI(imageUri)
+                if (mTimer == null) {
+                    go_button.isEnabled = false
+                    back_button.isEnabled = false
+                    start_and_stop_button.text = "停止"
+
+                    mTimer = Timer()
+                    mTimer!!.schedule(object : TimerTask() {
+                        override fun run() {
+                            try {
+                                cursor.moveToNext()
+                                val fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID)
+                                val id = cursor.getLong(fieldIndex)
+                                val imageUri =
+                                    ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                                mHandler.post {
+                                    image.setImageURI(imageUri)
+                                }
+                            } catch (e: Exception) {
+                                cursor.moveToFirst()
+                                mHandler.post {
+                                    image.setImageURI(imageUri)
+                                }
                             }
                         }
-                    }
-                }, 2000, 2000)
+                    }, 2000, 2000)
+                }else if(mTimer != null){
+                    mTimer!!.cancel()
+                    mTimer =null
+                    go_button.isEnabled = true
+                    back_button.isEnabled = true
+                    start_and_stop_button.text = "再生"
+                }
             }
         }
 //        cursor.close()
